@@ -5,14 +5,14 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-/// @title StreamRewarder Contract
-/// @notice This contract manages the distribution of rewards for staked assets 
-/// @dev Implements reward calculation and distribution for multiple reward tokens.
-contract StreamRewarder is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
+
+// Author of this contract is Deepakroxx and is currently even used in the org the OP works for. So you 
+// might find a little variation of this deployed on some blockchains.
+contract StreamRewarder is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     struct Reward {
@@ -62,13 +62,8 @@ contract StreamRewarder is Initializable, ReentrancyGuardUpgradeable, OwnableUpg
 
     /* ================================= Constructor ===========================*/
     
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(address _rewardQueuer, uint256 _duration) public initializer {
-        __Ownable_init(msg.sender);
-        isRewardQueuer[_rewardQueuer] = true;
+    constructor(address rewardQueuer, uint256 _duration) Ownable(msg.sender) {
+        isRewardQueuer[rewardQueuer] = true;
         duration = _duration;
     }
 
