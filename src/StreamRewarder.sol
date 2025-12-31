@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+// node_modules\@openzeppelin\contracts\security\ReentrancyGuard.sol
 
 
 // Author of this contract is Deepakroxx and is currently even used in the org the OP works for. So you 
@@ -62,7 +62,7 @@ contract StreamRewarder is Ownable, ReentrancyGuard {
 
     /* ================================= Constructor ===========================*/
     
-    constructor(address rewardQueuer, uint256 _duration) Ownable(msg.sender) {
+    constructor(address rewardQueuer, uint256 _duration)  {
         isRewardQueuer[rewardQueuer] = true;
         duration = _duration;
     }
@@ -70,15 +70,19 @@ contract StreamRewarder is Ownable, ReentrancyGuard {
     /* ================= Modifiers ===============================*/
     
     modifier onlyRewardQueuer() {
+        _onlyRewardQueuer();
+        _;
+    }
+
+    function _onlyRewardQueuer() internal {
         if (!isRewardQueuer[msg.sender])
             revert OnlyRewardQueuer();
-        _;
     }
 
     /* ============================= External Getters ======================*/
 
       /// @notice Returns the total staked amount of the receipt token
-    /// @return The total supply of the receipt token
+    /// @return The total supply of the receipt tokenF
     function totalStaked() public virtual view returns (uint256) {
         return IERC20(receiptToken).totalSupply();
     }

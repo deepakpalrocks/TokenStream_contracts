@@ -18,8 +18,8 @@ contract deployVault is Script {
 
         address employer = 0x03F391AeB0Ef8cAbEF46C075F66980E2e8FEB7b0;
 
-        // vm.startBroadcast();
-        vm.startPrank(employer);
+        vm.startBroadcast();
+        // vm.startPrank(employer);
 
         StreamRewarder rewarder =  new StreamRewarder(deployer, 365 days);        
         SalaryReceiptToken salaryReceipt = new SalaryReceiptToken("Deepak's Sample Receipt","DSR", address(rewarder));
@@ -35,13 +35,14 @@ contract deployVault is Script {
         salaryReceipt.mint(employer, 1000 ether);
         usdt.mint(employer, 1000000 ether);
 
-        vm.startPrank(employer);
+        // vm.startPrank(employer);
         salaryReceipt.transfer(employee1, 300 ether);
         salaryReceipt.transfer(employee2, 300 ether);
         salaryReceipt.transfer(employee3, 400 ether);
 
         usdt.approve(address(rewarder), 1000000 ether);
         rewarder.queueNewRewards(1000000 ether, address(usdt));
+        vm.stopBroadcast();
 
         vm.warp(block.timestamp + 5 days);
 
@@ -66,7 +67,7 @@ contract deployVault is Script {
         console.log("employee2 reward token balance: ", usdt.balanceOf(employee2));
         console.log("employee3 reward token balance: ", usdt.balanceOf(employee3));
 
-        // vm.stopBroadcast();
+        
     }
 }
 

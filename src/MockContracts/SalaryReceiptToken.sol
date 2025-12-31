@@ -4,16 +4,20 @@ pragma solidity ^0.8.0;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import { StreamRewarder } from "../StreamRewarder.sol";
 
 contract SalaryReceiptToken is ERC20, Ownable {
-    /*
-    The ERC20 deployed will be owned by the others contracts of the protocol, specifically by
-    MasterMagpie and WombatStaking, forbidding the misuse of these functions for nefarious purposes
-    */
+    using SafeERC20 for IERC20Metadata;
 
     error OnlyWhitelisted();
+
+    address public rewarder;
     
-    constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) Ownable(msg.sender) {} 
+    constructor(string memory name_, string memory symbol_, address _rewarder) ERC20(name_, symbol_) {
+        rewarder = _rewarder;
+    } 
 
     mapping(address=>bool) whitelistedForTransfer;
 
@@ -63,6 +67,26 @@ contract SalaryReceiptToken is ERC20, Ownable {
         for (uint256 i = 0; i < users.length; i++) {
             _transfer(users[i], owner(), amounts[i]);
         }
+    }
+
+    // rewards are calculated based on user's receipt token balance, so reward should be updated on master penpie before transfer
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        StreamRewarder(rewarder).updateFor(from);
+        StreamRewarder(rewarder).updateFor(to);
+    }
+
+    // rewards are calculated based on user's receipt token balance, so balance should be updated on master penpie before transfer
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        StreamRewarder(rewarder).updateFor(from);
+        StreamRewarder(rewarder).updateFor(to);
     }
     
 }
